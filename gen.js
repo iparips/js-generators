@@ -6,9 +6,21 @@ const co = require('co')
 // 	.then( post => post.title)
 // 	.then(t => console.log(t))
 
-co(function *() {
+function run(generator) {
+	const iterable = generator()
+	const iteration = iterable.next()
+	const fetchPromise = iteration.value
+	fetchPromise
+	.then(fetchResult => iterable.next(fetchResult).value)
+	.then(fetchResultJson => iterable.next(fetchResultJson))
+}
+
+
+run(function *() {
 	const uri = 'http://jsonplaceholder.typicode.com/posts/1'
 	const response = yield fetch(uri)
+	console.log("Response: ", response)
 	const post = yield response.json()
-	console.log(post)
+	console.log("Post:" , post)
 })
+
