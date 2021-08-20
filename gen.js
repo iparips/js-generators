@@ -1,20 +1,17 @@
 const fetch = require('node-fetch')
 const co = require('co')
 
-// fetch('http://jsonplaceholder.typicode.com/posts/1')
-// 	.then(x => x.json())
-// 	.then( post => post.title)
-// 	.then(t => console.log(t))
-
 function run(generator) {
-	const iterable = generator()
-	const iteration = iterable.next()
-	const fetchPromise = iteration.value
-	fetchPromise
-	.then(fetchResult => iterable.next(fetchResult).value)
-	.then(fetchResultJson => iterable.next(fetchResultJson))
-}
+	const iterator = generator()
 
+	function iterate(iteration) {
+		if(iteration.done) return iteration.value
+		return iteration.value.then(x => iterate(iterator.next(x)))
+	}
+
+	return iterate(iterator.next())
+
+}
 
 run(function *() {
 	const uri = 'http://jsonplaceholder.typicode.com/posts/1'
